@@ -71,47 +71,31 @@ struct PanelContentView: View {
                 .padding(.trailing, -4)
                 .padding(.leading, -10)
 
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 12)
-                    .overlay(
-                        WindowDragArea(onDoubleClick: {
-                        sessionStore.isTerminalExpanded.toggle()
-                        onToggleExpand?()
-                        })
-                            .frame(height: 200)
-                    )
-
-
                 SessionTabBar(sessionStore: sessionStore)
 
+                Button(action: { sessionStore.createQuickSession() }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 12, weight: .medium))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.white.opacity(foregroundOpacity))
+                .help("New session")
+
                 Rectangle()
                     .foregroundColor(.clear)
                     .frame(height: 12)
                     .overlay(
                         WindowDragArea(onDoubleClick: {
-                        sessionStore.isTerminalExpanded.toggle()
-                        onToggleExpand?()
+                            sessionStore.isTerminalExpanded.toggle()
+                            onToggleExpand?()
                         })
-                            .frame(height: 200)
+                        .frame(height: 200)
                     )
 
                 StatusBarView()
                     .opacity(foregroundOpacity)
-
-                ZStack {
-                    Button(action: { sessionStore.createQuickSession() }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 12, weight: .medium))
-                            .frame(width: 28, height: 28)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.white.opacity(foregroundOpacity))
-                    .help("New session")
-                }
-                .padding(.leading, -4)
-                .padding(.trailing, -10)
             }
             .padding(.horizontal, 12)
             .background(Color(nsColor: NSColor(white: 0.14, alpha: 1.0)).opacity(chromeBackgroundOpacity))
