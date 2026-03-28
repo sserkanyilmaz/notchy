@@ -73,9 +73,8 @@ class TerminalPanel: NSPanel {
             let panelHeight = frame.height
             let x = rect.midX - panelWidth / 2
             let y = screen.visibleFrame.maxY - panelHeight
-            setFrameOrigin(NSPoint(x: x, y: y))
+            animateIn(to: NSPoint(x: x, y: y))
         }
-        makeKeyAndOrderFront(nil)
         NotificationCenter.default.post(name: .NotchyNotchStatusChanged, object: nil)
     }
 
@@ -85,13 +84,31 @@ class TerminalPanel: NSPanel {
         let panelHeight = frame.height
         let x = screenFrame.midX - panelWidth / 2
         let y = screenFrame.maxY - panelHeight
-        setFrameOrigin(NSPoint(x: x, y: y))
-        makeKeyAndOrderFront(nil)
+        animateIn(to: NSPoint(x: x, y: y))
         NotificationCenter.default.post(name: .NotchyNotchStatusChanged, object: nil)
     }
 
     func hidePanel() {
-        orderOut(nil)
+        NSAnimationContext.runAnimationGroup({ ctx in
+            ctx.duration = 0.12
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            animator().alphaValue = 0
+        }, completionHandler: {
+            self.orderOut(nil)
+            self.alphaValue = 1
+        })
+    }
+
+    private func animateIn(to origin: NSPoint) {
+        alphaValue = 0
+        setFrameOrigin(NSPoint(x: origin.x, y: origin.y - 6))
+        makeKeyAndOrderFront(nil)
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.18
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            animator().alphaValue = 1
+            animator().setFrameOrigin(origin)
+        }
     }
 
     private func handleToggleExpand() {
