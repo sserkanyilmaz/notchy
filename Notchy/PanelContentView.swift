@@ -96,6 +96,9 @@ struct PanelContentView: View {
                             .frame(height: 200)
                     )
 
+                StatusBarView()
+                    .opacity(foregroundOpacity)
+
                 ZStack {
                     Button(action: { sessionStore.createQuickSession() }) {
                         Image(systemName: "plus")
