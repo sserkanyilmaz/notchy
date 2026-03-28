@@ -68,13 +68,28 @@ class SessionStore {
         }
     }
 
+    // MARK: - Helpers
+
+    /// Converts file:// URLs to plain paths; falls back to ~/Desktop
+    static func sanitizePath(_ dir: String) -> String {
+        if dir.hasPrefix("file://") {
+            let path = URL(string: dir)?.path ?? ""
+            return path.isEmpty || path == "/" ? NSHomeDirectory() + "/Desktop" : path
+        }
+        return dir.isEmpty ? NSHomeDirectory() + "/Desktop" : dir
+    }
+
     // MARK: - Session Persistence
 
     private func restoreSessions() {
         guard let data = UserDefaults.standard.data(forKey: Self.sessionsKey),
               let persisted = try? JSONDecoder().decode([PersistedSession].self, from: data),
               !persisted.isEmpty else { return }
-        sessions = persisted.map { TerminalSession(persisted: $0) }
+        sessions = persisted.map {
+            var s = TerminalSession(persisted: $0)
+            s.workingDirectory = Self.sanitizePath(s.workingDirectory)
+            return s
+        }
         if let savedId = UserDefaults.standard.string(forKey: Self.activeSessionKey),
            let uuid = UUID(uuidString: savedId),
            sessions.contains(where: { $0.id == uuid }) {

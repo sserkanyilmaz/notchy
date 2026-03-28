@@ -215,8 +215,7 @@ class TerminalManager: NSObject, LocalProcessTerminalViewDelegate {
             execName: "-" + (shell as NSString).lastPathComponent
         )
 
-        let resolvedDir = URL(string: workingDirectory)?.path ?? workingDirectory
-        let escapedDir = shellEscape(resolvedDir)
+        let escapedDir = shellEscape(SessionStore.sanitizePath(workingDirectory))
         terminal.send(txt: "cd \(escapedDir) && clear\r")
 
         terminals[sessionId] = terminal
