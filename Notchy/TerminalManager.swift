@@ -203,10 +203,7 @@ class TerminalManager: NSObject, LocalProcessTerminalViewDelegate {
         terminal.sessionId = sessionId
         terminal.processDelegate = self
 
-        // Match macOS Terminal default font size
-        terminal.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
-        terminal.nativeBackgroundColor = NSColor(white: 0.1, alpha: 1.0)
-        terminal.nativeForegroundColor = NSColor(white: 0.9, alpha: 1.0)
+        applyWezTermStyle(to: terminal)
 
         let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
         let environment = buildEnvironment()
@@ -251,6 +248,64 @@ class TerminalManager: NSObject, LocalProcessTerminalViewDelegate {
 
     func destroyTerminal(for sessionId: UUID) {
         terminals.removeValue(forKey: sessionId)
+    }
+
+    // MARK: - WezTerm Style (Catppuccin Mocha)
+
+    private func applyWezTermStyle(to terminal: ClickThroughTerminalView) {
+        // Font: JetBrains Mono Medium 13pt (fallback to system mono)
+        if let font = NSFont(name: "JetBrainsMono-Medium", size: 13) {
+            terminal.font = font
+        } else {
+            terminal.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .medium)
+        }
+
+        // Catppuccin Mocha — background & foreground
+        terminal.nativeBackgroundColor = hex("#1e1e2e", alpha: 0.95)
+        terminal.nativeForegroundColor = hex("#cdd6f4")
+
+        // Catppuccin Mocha 16-color palette (SwiftTerm Color: values 0-65535)
+        terminal.installColors([
+            stColor("#45475a"), // 0  black
+            stColor("#f38ba8"), // 1  red
+            stColor("#a6e3a1"), // 2  green
+            stColor("#f9e2af"), // 3  yellow
+            stColor("#89b4fa"), // 4  blue
+            stColor("#cba6f7"), // 5  magenta
+            stColor("#94e2d5"), // 6  cyan
+            stColor("#bac2de"), // 7  white
+            stColor("#585b70"), // 8  bright black
+            stColor("#f38ba8"), // 9  bright red
+            stColor("#a6e3a1"), // 10 bright green
+            stColor("#f9e2af"), // 11 bright yellow
+            stColor("#89b4fa"), // 12 bright blue
+            stColor("#cba6f7"), // 13 bright magenta
+            stColor("#94e2d5"), // 14 bright cyan
+            stColor("#a6adc8"), // 15 bright white
+        ])
+    }
+
+    /// SwiftTerm Color (values 0–65535) from hex string
+    private func stColor(_ hex: String) -> SwiftTerm.Color {
+        let h = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
+        var rgb: UInt64 = 0
+        Scanner(string: h).scanHexInt64(&rgb)
+        let r = UInt16((rgb >> 16) & 0xFF) * 257
+        let g = UInt16((rgb >> 8)  & 0xFF) * 257
+        let b = UInt16( rgb        & 0xFF) * 257
+        return SwiftTerm.Color(red: r, green: g, blue: b)
+    }
+
+    private func hex(_ hex: String, alpha: CGFloat = 1.0) -> NSColor {
+        let h = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
+        var rgb: UInt64 = 0
+        Scanner(string: h).scanHexInt64(&rgb)
+        return NSColor(
+            red:   CGFloat((rgb >> 16) & 0xFF) / 255,
+            green: CGFloat((rgb >> 8)  & 0xFF) / 255,
+            blue:  CGFloat( rgb        & 0xFF) / 255,
+            alpha: alpha
+        )
     }
 
     private func buildEnvironment() -> [String] {
