@@ -181,6 +181,16 @@ class TerminalPanel: NSPanel {
             sessionStore.createQuickSession()
             return true
         }
+        // Cmd+1…9 → switch to nth tab
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+           let ch = event.charactersIgnoringModifiers,
+           let digit = Int(ch), digit >= 1 && digit <= 9 {
+            let index = digit - 1
+            if index < sessionStore.sessions.count {
+                sessionStore.selectSession(sessionStore.sessions[index].id)
+            }
+            return true
+        }
         return super.performKeyEquivalent(with: event)
     }
 
