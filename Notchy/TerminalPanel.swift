@@ -125,7 +125,6 @@ class TerminalPanel: NSPanel {
     }
 
     @objc private func windowDidBecomeKey(_ notification: Notification) {
-        sessionStore.panelDidBecomeKey()
         updateOpacity()
     }
 

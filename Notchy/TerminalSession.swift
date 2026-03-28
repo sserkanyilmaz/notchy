@@ -31,7 +31,7 @@ struct TerminalSession: Identifiable {
         self.id = UUID()
         self.projectName = projectName
         self.projectPath = projectPath
-        self.workingDirectory = workingDirectory ?? projectPath ?? NSHomeDirectory()
+        self.workingDirectory = workingDirectory ?? projectPath ?? (NSHomeDirectory() + "/Desktop")
         self.hasStarted = started
         self.terminalStatus = .idle
         self.generation = 0

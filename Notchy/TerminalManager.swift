@@ -194,7 +194,7 @@ class TerminalManager: NSObject, LocalProcessTerminalViewDelegate {
 
     private var terminals: [UUID: LocalProcessTerminalView] = [:]
 
-    func terminal(for sessionId: UUID, workingDirectory: String, launchClaude: Bool = true) -> LocalProcessTerminalView {
+    func terminal(for sessionId: UUID, workingDirectory: String) -> LocalProcessTerminalView {
         if let existing = terminals[sessionId] {
             return existing
         }
@@ -218,14 +218,9 @@ class TerminalManager: NSObject, LocalProcessTerminalViewDelegate {
             execName: "-" + (shell as NSString).lastPathComponent
         )
 
-        // cd to working directory, launch claude only if CLAUDE.md exists
-        let escapedDir = shellEscape(workingDirectory)
-        let hasClaude = launchClaude && FileManager.default.fileExists(atPath: (workingDirectory as NSString).appendingPathComponent("CLAUDE.md"))
-        if hasClaude {
-            terminal.send(txt: "cd \(escapedDir) && clear && claude\r")
-        } else {
-            terminal.send(txt: "cd \(escapedDir) && clear\r")
-        }
+        let resolvedDir = URL(string: workingDirectory)?.path ?? workingDirectory
+        let escapedDir = shellEscape(resolvedDir)
+        terminal.send(txt: "cd \(escapedDir) && clear\r")
 
         terminals[sessionId] = terminal
         return terminal

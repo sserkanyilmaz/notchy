@@ -190,37 +190,16 @@ struct PanelContentView: View {
                         TerminalSessionView(
                             sessionId: session.id,
                             workingDirectory: session.workingDirectory,
-                            launchClaude: session.projectPath != nil,
                             generation: session.generation
                         )
-                    } else if session.projectPath != nil && !sessionStore.activeXcodeProjects.contains(session.projectName) {
-                        // Xcode closed for this project
-                        placeholderView("Xcode project not open")
-                            .overlay {
-                                if let projectPath = session.projectPath {
-                                    Button("Open in Xcode") {
-                                        NSWorkspace.shared.open(URL(fileURLWithPath: projectPath))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(Color.white.opacity(0.15))
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                                    .padding(.top, 28)
-                                }
-                            }
                     } else {
-                        placeholderView("Click a project tab to start a terminal session")
+                        placeholderView("Tap to start terminal")
                             .onTapGesture {
                                 sessionStore.startSessionIfNeeded(session.id)
                             }
                     }
-                } else if sessionStore.sessions.isEmpty {
-                    placeholderView("No Xcode projects detected.\nClick + to create a new session.")
                 } else {
-                    placeholderView("Select a project to begin")
+                    placeholderView("Click + to create a new session.")
                 }
             }
         }
@@ -229,11 +208,6 @@ struct PanelContentView: View {
         .clipShape(UnevenRoundedRectangle(topLeadingRadius: 8.5, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 8.5))
         .onAppear {
             sessionStore.refreshLastCheckpoint()
-        }
-        .onChange(of: sessionStore.hasCompletedInitialDetection) {
-            if sessionStore.hasCompletedInitialDetection && sessionStore.sessions.isEmpty {
-                sessionStore.createQuickSession()
-            }
         }
         .onChange(of: sessionStore.activeSessionId) {
             sessionStore.refreshLastCheckpoint()

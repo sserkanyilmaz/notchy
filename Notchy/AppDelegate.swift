@@ -31,8 +31,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             setupNotchWindow()
         }
         setupHotkey()
-        // Detect in background so launch isn't blocked
-        sessionStore.detectAllXcodeProjectsAsync()
     }
 
     private func setupStatusItem() {
@@ -67,10 +65,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             queue: .main
         ) { [weak self] _ in
             guard let self else { return }
-            if self.panelOpenedViaHover {
-                self.panelOpenedViaHover = false
-                self.stopHoverTracking()
-            }
+            self.panelOpenedViaHover = false
+            self.stopHoverTracking()
         }
     }
 
@@ -98,7 +94,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         showPanelBelowNotch()
         panelOpenedViaHover = true
         startHoverTracking()
-        sessionStore.detectAndSwitchAsync()
     }
 
     private func showPanelBelowNotch() {
@@ -182,12 +177,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             panelOpenedViaHover = false
             stopHoverTracking()
         } else {
-            panelOpenedViaHover = false
-            // Show panel immediately
             showPanelBelowStatusItem()
-
-            // Then detect projects in background
-            sessionStore.detectAndSwitchAsync()
+            panelOpenedViaHover = true
+            startHoverTracking()
         }
     }
 
@@ -337,6 +329,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let buttonRect = button.convert(button.bounds, to: nil)
             let screenRect = window.convertToScreen(buttonRect)
             panel.showPanel(below: screenRect)
+            panelOpenedViaHover = true
+            startHoverTracking()
         }
     }
 
