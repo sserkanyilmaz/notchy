@@ -181,6 +181,12 @@ class TerminalPanel: NSPanel {
             sessionStore.createQuickSession()
             return true
         }
+        if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "w" {
+            if let id = sessionStore.activeSessionId {
+                sessionStore.closeSession(id)
+            }
+            return true
+        }
         // Cmd+1…9 → switch to nth tab
         if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
            let ch = event.charactersIgnoringModifiers,
